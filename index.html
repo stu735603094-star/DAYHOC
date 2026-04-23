@@ -2,134 +2,83 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thực hành vẽ đường cứu hộ - THPT Trần Suyền</title>
+    <title>Thực hành Thoát nạn - THPT Trần Suyền</title>
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; }
-        .header { background: #003366; color: white; width: 100%; text-align: center; padding: 15px 0; border-bottom: 5px solid #ff9800; }
-        
-        .map-container { 
-            position: relative; 
-            width: 95%; 
-            max-width: 900px; 
-            margin: 20px auto; 
-            background: white; 
-            border-radius: 10px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            cursor: crosshair;
-            touch-action: none;
-        }
-
-        .map-container img { width: 100%; height: auto; display: none; border-radius: 10px; }
-        .map-container img.active { display: block; }
-
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-        }
-
-        .controls { margin: 15px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-        button { padding: 10px 18px; border-radius: 25px; border: 1px solid #003366; background: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; text-align: center; background: #f0f4f8; margin: 0; }
+        .header { background: #003366; color: white; padding: 15px; border-bottom: 5px solid #ff9800; }
+        .map-box { position: relative; width: 95%; max-width: 900px; margin: 15px auto; background: white; border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden; }
+        img { width: 100%; display: none; pointer-events: none; }
+        img.active { display: block; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; cursor: crosshair; touch-action: none; }
+        .controls { margin: 15px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+        button { padding: 10px 15px; cursor: pointer; border-radius: 20px; border: 1px solid #003366; font-weight: bold; background: white; }
         button.active { background: #003366; color: white; }
-        
-        /* Nút nộp bài nổi bật */
-        .btn-submit { background: #4CAF50; color: white; border: none; }
-        .btn-submit:hover { background: #45a049; transform: scale(1.05); }
-        .btn-clear { background: #f44336; color: white; border: none; }
-
-        .mission { width: 90%; max-width: 850px; background: white; padding: 15px; border-left: 6px solid #4CAF50; border-radius: 8px; margin-bottom: 30px; }
+        .btn-check { background: #28a745; color: white; border: none; }
+        .btn-clear { background: #dc3545; color: white; border: none; }
+        #result-msg { margin: 20px; padding: 15px; border-radius: 10px; display: none; font-size: 1.2em; font-weight: bold; transition: 0.5s; }
+        .success { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; display: block !important; }
+        .fail { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; display: block !important; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h2>BÀI THỰC HÀNH: TÌM ĐƯỜNG THOÁT LŨ</h2>
-    <p>Học sinh vẽ đường đi và nhấn "Nộp bài" để lưu kết quả</p>
+    <h2>BÀI TẬP: TÌM ĐƯỜNG ĐẾN ĐIỂM THOÁT NẠN AN TOÀN</h2>
+    <p>Điểm đến: Chùa Hương Sơn hoặc Trạm y tế xã Hòa Kiến</p>
 </div>
 
 <div class="controls">
-    <button onclick="changeMap('gt', this)" class="active">Giao thông</button>
-    <button onclick="changeMap('dh', this)">Địa hình</button>
-    <button onclick="changeMap('c1', this)">Báo động 1</button>
-    <button onclick="changeMap('c2', this)">Báo động 2</button>
-    <button onclick="changeMap('c3', this)">Báo động 3</button>
+    <button onclick="setMap('gt', this)" class="active">Giao thông</button>
+    <button onclick="setMap('dh', this)">Địa hình (Gợi ý)</button>
+    <button onclick="setMap('c3', this)">Báo động 3</button>
     <button class="btn-clear" onclick="clearCanvas()">🧹 Xóa vẽ</button>
-    <button class="btn-submit" onclick="downloadResult()">💾 NỘP BÀI (Lưu ảnh)</button>
+    <button class="btn-check" onclick="checkLogic()">✅ KIỂM TRA KẾT QUẢ</button>
 </div>
 
-<div class="map-container" id="capture-area">
-    <img src="GTHONG.png" id="gt" class="active" crossorigin="anonymous">
-    <img src="DEM2.png" id="dh" crossorigin="anonymous">
-    <img src="BDC1.png" id="c1" crossorigin="anonymous">
-    <img src="BDC2.png" id="c2" crossorigin="anonymous">
-    <img src="BDC3.png" id="c3" crossorigin="anonymous">
-    <canvas id="drawing-canvas"></canvas>
+<div class="map-box" id="container">
+    <img src="GTHONG.png" id="gt" class="active">
+    <img src="DEM2.png" id="dh">
+    <img src="BDC1.png" id="c1">
+    <img src="BDC2.png" id="c2">
+    <img src="BDC3.png" id="c3">
+    <canvas id="canvas"></canvas>
 </div>
 
-<div class="mission">
-    <b>Yêu cầu:</b> Dựa trên bản đồ ngập lụt, em hãy vẽ tuyến đường an toàn để di chuyển người dân đến nơi cao. Sau khi vẽ xong, nhấn <b>Nộp bài</b> để lưu lại kết quả bài làm.
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<div id="result-msg"></div>
 
 <script>
-    const canvas = document.getElementById('drawing-canvas');
+    const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
-    const container = document.getElementById('capture-area');
+    const container = document.getElementById('container');
     let drawing = false;
+    let endX, endY;
 
-    function resizeCanvas() {
-        const activeImg = document.querySelector('.map-container img.active');
+    function resize() {
+        const activeImg = document.querySelector('img.active');
         canvas.width = container.offsetWidth;
         canvas.height = activeImg.offsetHeight;
-        clearCanvas(); // Reset canvas khi đổi bản đồ để tránh lệch tọa độ
     }
+    window.onload = () => setTimeout(resize, 500);
+    window.onresize = resize;
 
-    window.onload = () => setTimeout(resizeCanvas, 500);
-    window.onresize = resizeCanvas;
-
-    function changeMap(id, btn) {
-        document.querySelectorAll('.map-container img').forEach(img => img.classList.remove('active'));
+    function setMap(id, btn) {
+        document.querySelectorAll('img').forEach(i => i.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        setTimeout(resizeCanvas, 100);
+        resize();
     }
 
-    // Vẽ
-    canvas.addEventListener('mousedown', () => drawing = true);
-    canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousedown', () => { drawing = true; ctx.beginPath(); });
     canvas.addEventListener('mousemove', (e) => {
         if (!drawing) return;
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        ctx.lineWidth = 5;
-        ctx.lineCap = 'round';
-        ctx.strokeStyle = '#ff0000'; // Màu đỏ cho nổi bật
-        ctx.lineTo(x, y);
-        ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(x, y);
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.strokeStyle = 'red';
+        ctx.lineTo(x, y); ctx.stroke();
+        endX = x; endY = y;
     });
+    canvas.addEventListener('mouseup', () => drawing = false);
 
-    // Xóa
-    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
-
-    // TẢI KẾT QUẢ VỀ MÁY (Nộp bài)
-    function downloadResult() {
-        html2canvas(document.getElementById('capture-area')).then(canvasResult => {
-            const link = document.createElement('a');
-            link.download = 'BaiLam_HocSinh_' + new Date().getTime() + '.png';
-            link.href = canvasResult.toDataURL();
-            link.click();
-            alert("Đã lưu bài làm của em thành file ảnh! Hãy gửi file này cho giáo viên nhé.");
-        });
-    }
-</script>
-
-</body>
-</html>
+    function clearCanvas
