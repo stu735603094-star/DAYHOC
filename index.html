@@ -3,217 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mô Phỏng Ngập Lụt Tự Động - THPT Trần Suyền</title>
+    <title>Thực hành vẽ đường cứu hộ - THPT Trần Suyền</title>
     <style>
-        :root {
-            --primary-color: #004a8c;
-            --accent-color: #ff9800;
-            --danger-color: #e91e63;
-            --bg-color: #f4f7f9;
-            --card-bg: #ffffff;
-            --text-dark: #2c3e50;
-            --shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            margin: 0; 
-            background-color: var(--bg-color); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center;
-            color: var(--text-dark);
-        }
-
-        .header { 
-            background: linear-gradient(135deg, var(--primary-color) 0%, #002d5a 100%); 
-            color: white; 
-            width: 100%; 
-            text-align: center; 
-            padding: 30px 0; 
-            border-bottom: 5px solid var(--accent-color);
-            box-shadow: var(--shadow);
-        }
-
-        .header h1 { margin: 0; font-size: 1.8rem; text-transform: uppercase; }
-        .header p { margin: 5px 0 0; opacity: 0.9; font-weight: 300; }
-
-        .controls { 
-            margin: 25px; 
-            display: flex; 
-            gap: 15px; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-        }
-
-        button { 
-            padding: 12px 25px; 
-            cursor: pointer; 
-            border: 2px solid var(--primary-color); 
-            border-radius: 50px; 
-            background: white; 
-            font-weight: bold; 
-            color: var(--primary-color); 
-            transition: all 0.3s ease;
-        }
-
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        button.active { background: var(--primary-color); color: white; }
-        button.warning { border-color: var(--danger-color); color: var(--danger-color); }
-        button.warning.active { background: var(--danger-color); color: white; }
-
-        .mission-box { 
-            margin: 10px 20px 25px 20px; 
-            padding: 25px; 
-            background: var(--card-bg); 
-            border-left: 8px solid var(--danger-color); 
-            max-width: 950px; 
-            width: 90%;
-            border-radius: 12px; 
-            box-shadow: var(--shadow);
-            box-sizing: border-box;
-        }
-
-        .mission-title { 
-            font-size: 1.3rem; 
-            font-weight: 800; 
-            color: var(--danger-color); 
-            margin-bottom: 10px; 
-        }
-
-        #guide-text { line-height: 1.6; font-size: 1.1rem; }
-        #timer-display { font-weight: bold; color: var(--primary-color); margin-top: 10px; font-style: italic; }
-
-        /* Khung bản đồ */
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f0f4f8; display: flex; flex-direction: column; align-items: center; }
+        .header { background: #003366; color: white; width: 100%; text-align: center; padding: 15px 0; border-bottom: 5px solid #ff9800; }
+        
         .map-container { 
             position: relative; 
-            width: 92%; 
-            max-width: 1000px; 
-            background: #eee; /* Màu nền xám nhẹ khi chưa có ảnh */
-            padding: 10px; 
-            border-radius: 15px; 
-            box-shadow: var(--shadow); 
-            margin-bottom: 40px;
-            min-height: 300px; /* Giữ khung khi chưa có ảnh */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+            width: 95%; 
+            max-width: 900px; 
+            margin: 20px auto; 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            cursor: crosshair;
+            touch-action: none;
         }
 
-        /* Ẩn tất cả ảnh ban đầu */
-        .map-layer { 
-            width: 100%; 
-            height: auto; 
-            display: none; 
-            border-radius: 8px; 
+        .map-container img { width: 100%; height: auto; display: none; border-radius: 10px; }
+        .map-container img.active { display: block; }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
         }
 
-        /* Chỉ hiển thị khi có class active */
-        .map-layer.active { 
-            display: block; 
-            animation: fadeIn 0.8s ease forwards; 
-        }
+        .controls { margin: 15px; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+        button { padding: 10px 18px; border-radius: 25px; border: 1px solid #003366; background: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button.active { background: #003366; color: white; }
+        
+        /* Nút nộp bài nổi bật */
+        .btn-submit { background: #4CAF50; color: white; border: none; }
+        .btn-submit:hover { background: #45a049; transform: scale(1.05); }
+        .btn-clear { background: #f44336; color: white; border: none; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-
-        @media (max-width: 600px) {
-            button { width: 100%; }
-        }
+        .mission { width: 90%; max-width: 850px; background: white; padding: 15px; border-left: 6px solid #4CAF50; border-radius: 8px; margin-bottom: 30px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>HỆ THỐNG MÔ PHỎNG LŨ LỤT TỰ ĐỘNG</h1>
-    <p>Trường THPT Trần Suyền - Huyện Phú Hòa</p>
+    <h2>BÀI THỰC HÀNH: TÌM ĐƯỜNG THOÁT LŨ</h2>
+    <p>Học sinh vẽ đường đi và nhấn "Nộp bài" để lưu kết quả</p>
 </div>
 
 <div class="controls">
-    <button onclick="showStatic('gt', this)" id="btn-gt">Giao thông</button>
-    <button onclick="showStatic('dh', this)" id="btn-dh">Địa hình</button>
-    <button onclick="startFloodSimulation(this)" class="warning">🌊 Báo động ngập lụt</button>
+    <button onclick="changeMap('gt', this)" class="active">Giao thông</button>
+    <button onclick="changeMap('dh', this)">Địa hình</button>
+    <button onclick="changeMap('c1', this)">Báo động 1</button>
+    <button onclick="changeMap('c2', this)">Báo động 2</button>
+    <button onclick="changeMap('c3', this)">Báo động 3</button>
+    <button class="btn-clear" onclick="clearCanvas()">🧹 Xóa vẽ</button>
+    <button class="btn-submit" onclick="downloadResult()">💾 NỘP BÀI (Lưu ảnh)</button>
 </div>
 
-<div class="mission-box">
-    <div class="mission-title" id="mission-title">🎯 NHIỆM VỤ:</div>
-    <div id="guide-text">Vui lòng chọn một loại bản đồ phía trên để bắt đầu quan sát khu vực.</div>
-    <div id="timer-display"></div>
+<div class="map-container" id="capture-area">
+    <img src="GTHONG.png" id="gt" class="active" crossorigin="anonymous">
+    <img src="DEM2.png" id="dh" crossorigin="anonymous">
+    <img src="BDC1.png" id="c1" crossorigin="anonymous">
+    <img src="BDC2.png" id="c2" crossorigin="anonymous">
+    <img src="BDC3.png" id="c3" crossorigin="anonymous">
+    <canvas id="drawing-canvas"></canvas>
 </div>
 
-<div class="map-container">
-    <img src="GTHONG.png" id="gt" class="map-layer">
-    <img src="DEM%20(2).png" id="dh" class="map-layer">
-    <img src="BDC1.png" id="c1" class="map-layer">
-    <img src="BDC2.png" id="c2" class="map-layer">
-    <img src="BDC3.png" id="c3" class="map-layer">
-    
-    <p id="placeholder-text" style="color: #888; font-style: italic;">Dữ liệu bản đồ sẽ hiển thị tại đây...</p>
+<div class="mission">
+    <b>Yêu cầu:</b> Dựa trên bản đồ ngập lụt, em hãy vẽ tuyến đường an toàn để di chuyển người dân đến nơi cao. Sau khi vẽ xong, nhấn <b>Nộp bài</b> để lưu lại kết quả bài làm.
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <script>
-    const missions = {
-        'gt': 'Hãy quan sát mạng lưới giao thông chính. Xác định vị trí của trường THPT Trần Suyền so với các trục đường chính như QL25 và đường cao tốc.',
-        'dh': '<b>Nhiệm vụ:</b> Quan sát bản đồ cao trình. Em hãy tìm ra các vùng đất cao. Khu vực nào có thể dùng làm nơi sơ tán tập trung?',
-        'c1': '<b>Giai đoạn 1:</b> Nước bắt đầu lên. Em hãy tìm ra tuyến đường ngắn nhất từ trường đến các điểm cao an toàn mà không bị ngập.',
-        'c2': '<b>Giai đoạn 2:</b> Nước lũ dâng cao, nhiều tuyến đường đã bị ngập sâu. Học sinh cần có phương án dự phòng khác nếu đường cũ bị chặn.',
-        'c3': '<b>Giai đoạn 3 (Khẩn cấp):</b> Hầu hết các tuyến đường đã bị chia cắt. Em hãy đề xuất phương án ứng phó khác (cứu hộ thủy hoặc tại chỗ).'
-    };
+    const canvas = document.getElementById('drawing-canvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('capture-area');
+    let drawing = false;
 
-    let floodInterval;
-    let floodStep = 0;
-    const TIME_STEP = 5000; 
+    function resizeCanvas() {
+        const activeImg = document.querySelector('.map-container img.active');
+        canvas.width = container.offsetWidth;
+        canvas.height = activeImg.offsetHeight;
+        clearCanvas(); // Reset canvas khi đổi bản đồ để tránh lệch tọa độ
+    }
 
-    function clearAll() {
-        clearInterval(floodInterval);
-        document.querySelectorAll('.map-layer').forEach(img => img.classList.remove('active'));
+    window.onload = () => setTimeout(resizeCanvas, 500);
+    window.onresize = resizeCanvas;
+
+    function changeMap(id, btn) {
+        document.querySelectorAll('.map-container img').forEach(img => img.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
         document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-        document.getElementById('timer-display').innerText = "";
-        // Ẩn dòng chữ nhắc nhở khi bắt đầu hiển thị ảnh
-        if(document.getElementById('placeholder-text')) {
-            document.getElementById('placeholder-text').style.display = 'none';
-        }
-    }
-
-    function showStatic(id, btn) {
-        clearAll();
-        const targetImg = document.getElementById(id);
-        if(targetImg) targetImg.classList.add('active');
-        
-        document.getElementById('guide-text').innerHTML = missions[id];
-        document.getElementById('mission-title').innerText = "🎯 NHIỆM VỤ:";
         btn.classList.add('active');
+        setTimeout(resizeCanvas, 100);
     }
 
-    function startFloodSimulation(btn) {
-        clearAll();
-        btn.classList.add('active');
-        floodStep = 1;
-        runFloodStep();
+    // Vẽ
+    canvas.addEventListener('mousedown', () => drawing = true);
+    canvas.addEventListener('mouseup', () => { drawing = false; ctx.beginPath(); });
+    canvas.addEventListener('mousemove', (e) => {
+        if (!drawing) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#ff0000'; // Màu đỏ cho nổi bật
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, y);
+    });
 
-        floodInterval = setInterval(() => {
-            floodStep++;
-            if (floodStep <= 3) {
-                runFloodStep();
-            } else {
-                clearInterval(floodInterval);
-                document.getElementById('timer-display').innerText = "Mô phỏng hoàn tất - Mức độ ngập tối đa.";
-            }
-        }, TIME_STEP);
-    }
+    // Xóa
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
-    function runFloodStep() {
-        const id = 'c' + floodStep;
-        document.querySelectorAll('.map-layer').forEach(img => img.classList.remove('active'));
-        const targetImg = document.getElementById(id);
-        if(targetImg) targetImg.classList.add('active');
-        
-        document.getElementById('mission-title').innerText = "⚠️ CẢNH BÁO LŨ MỨC " + floodStep + ":";
-        document.getElementById('guide-text').innerHTML = missions[id];
-        
-        if(floodStep < 3) {
-            document.getElementById('timer-display').innerText = "Dự báo: Nước sẽ dâng thêm sau ít phút nữa...";
-        }
+    // TẢI KẾT QUẢ VỀ MÁY (Nộp bài)
+    function downloadResult() {
+        html2canvas(document.getElementById('capture-area')).then(canvasResult => {
+            const link = document.createElement('a');
+            link.download = 'BaiLam_HocSinh_' + new Date().getTime() + '.png';
+            link.href = canvasResult.toDataURL();
+            link.click();
+            alert("Đã lưu bài làm của em thành file ảnh! Hãy gửi file này cho giáo viên nhé.");
+        });
     }
 </script>
 
